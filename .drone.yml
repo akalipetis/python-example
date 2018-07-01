@@ -29,7 +29,7 @@ pipeline:
     when:
       branch: master
 
-service:
+services:
   docker:
     image: docker:18.03-dind
     command: [ "--storage-driver=aufs", "--tls=false" ]
