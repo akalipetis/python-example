@@ -1,0 +1,40 @@
+pipeline:
+  test:
+    image: akalipetis/ci:17.07.0_1.16.1
+    environment:
+      - DOCKER_HOST=tcp://docker:2375
+    commands:
+      - docker-compose run web python tests.py
+
+  build:
+    image: akalipetis/ci:17.07.0_1.16.1
+    environment:
+      - DOCKER_HOST=tcp://docker:2375
+    commands:
+      - docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+      - docker-compose build
+      - docker-compose push
+    secrets:
+      - source: docker-username
+        target: docker_username
+      - source: docker-password
+        target: docker_password
+    when:
+      branch: master
+
+  deploy:
+    image: akalipetis/ci:17.07.0_1.16.1
+    commands:
+      - docker stack deploy -c docker-compose.yml my-stack
+    when:
+      branch: master
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+services:
+  docker:
+    image: docker:18.03-dind
+    command: [ "--storage-driver=aufs", "--tls=false" ]
+    privileged: true
+    volumes:
+      - /mnt/drone-dind:/var/lib/docker

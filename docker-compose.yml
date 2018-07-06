@@ -1,0 +1,8 @@
+version: '3.5'
+
+services:
+  web:
+    image: akalipetis/python-example:${DRONE_COMMIT:-latest}
+    command: python /code/app.py
+    ports:
+      - 5000:5000
